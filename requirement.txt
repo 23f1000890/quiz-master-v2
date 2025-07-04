@@ -1,3 +1,4 @@
+axios==0.4.0
 bidict==0.23.1
 blinker==1.9.0
 certifi==2025.1.31
@@ -23,9 +24,13 @@ idna==3.10
 importlib_resources==6.5.2
 itsdangerous==2.2.0
 Jinja2==3.1.6
+lxml==5.4.0
+markdown-it-py==3.0.0
 MarkupSafe==3.0.2
+mdurl==0.1.2
 oauthlib==3.2.2
 passlib==1.7.4
+Pygments==2.19.2
 PyJWT==2.10.1
 pyotp==2.9.0
 python-dotenv==1.1.0
@@ -35,6 +40,7 @@ qrcode==8.1
 redis==6.2.0
 requests==2.32.3
 requests-oauthlib==2.0.0
+rich==14.0.0
 simple-websocket==1.1.0
 SQLAlchemy==2.0.40
 typing_extensions==4.13.2

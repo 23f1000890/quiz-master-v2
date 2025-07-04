@@ -41,7 +41,10 @@ app.register_blueprint(reg_user, url_prefix="/user") # user blueprint
 
 @app.get("/")
 def quiz_server():
-    return jsonify({"msg": "Welcome to my port"})
+    return jsonify({
+        "msg": "Welcome To IntelliQuest 2.0",
+        "desc": "This is the Exam Preparation site for multiple courses. Anyone can give a Mock Test here and evaluate themselves."
+    })
 
 #run app
 if __name__ == "__main__":

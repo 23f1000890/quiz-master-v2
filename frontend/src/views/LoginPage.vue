@@ -1,0 +1,121 @@
+<script setup>
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+
+const isLogin = ref(true);
+const email = ref("");
+const password = ref("");
+const username = ref("");
+const full_name = ref("");
+const dob = ref("");
+const qualification = ref("");
+const location = ref("");
+const error = ref("");
+
+const handleLogin = async() => {
+  try {
+    const response = await fetch("http://127.0.0.1:4001/auth/login/", {
+      method: "POST",
+      headers: {"content-type": "application/json"},
+      body: JSON.stringify({
+        email: email.value, 
+        password: password.value,
+      }),
+    })
+
+    const message = await response.json();
+    if(!response.ok) throw new Error(message.msg || "Invalid login, failed!!!");
+
+    localStorage.setItem("access_token", message.access_token);
+    localStorage.setItem("refresh_token", message.refresh_token);
+    localStorage.setItem("role", message.role);
+
+    router.push(message.role === "admin" ? "/admin" : "/user");
+  
+  } catch (err) {
+    error.value = err.message 
+  }
+}
+
+const handleRegister = async() => {
+  try {
+    const response = await fetch("http://127.0.0.1:4001/auth/register/", {
+      method: 'POST',
+      headers: {"content-type": "application/json"},
+      body: JSON.stringify({
+        email: email.value,
+        password: password.value,
+        username: username.value,
+        full_name: full_name.value,
+        qualification: qualification.value,
+        dob: dob.value,
+        location: location.value,
+      }),
+    })
+    const message = await response.json();
+    if(!response.ok) throw new Error(message.msg || "Registration Denied!!!");
+    isLogin.value = true;
+  } catch (err) {
+    error.value = err.message
+  }
+}
+</script>
+
+
+<template>
+  <div class="container mt-5 form-body row-gap-3 col-6 offset-3">
+    <h1 class="text-success" align="center">Welcome to intelliquest 2.0</h1>
+    <h1 class="text-light border-3 border-bottom border-danger-subtle mb-4 mt-3 text-center">{{ isLogin ? "login" : "Register" }}</h1>
+    <div class="col-4 offset-8 mt-3 text-danger" v-if="error">{{ error }}</div>
+    <form @submit.prevent="isLogin ? handleLogin() : handleRegister()">
+      <div class="mb-3 col-12">
+        <label for="email" class="form-label">Email:</label>
+        <input type="email" v-model="email" name="email" id="email" class="form-control" placeholder="Enter your Email" required>
+      </div>
+      <div class="mb-3 col-12">
+        <label for="password" class="form-label">Password:</label>
+        <input type="password" v-model="password" name="password" id="password" class="form-control" placeholder="Enter your Password" required>
+      </div>
+      <div class="mb-3 col-12" v-if="!isLogin">
+        <label for="username" class="form-label">Username:</label>
+        <input type="text" v-model="username" name="username" id="username" class="form-control" placeholder="Enter your Username" required>
+      </div>
+      <div class="mb-3 col-12" v-if="!isLogin">
+        <label for="full_name" class="form-label">Full Name:</label>
+        <input type="text" v-model="full_name" name="full_name" id="full_name" class="form-control" placeholder="Enter your Full Name" required>
+      </div>
+      <div class="mb-3 col-12" v-if="!isLogin">
+        <label for="dob" class="form-label">Date of Birth:</label>
+        <input type="date" v-model="dob" name="dob" id="dob" class="form-control">
+      </div>
+      <div class="mb-3 col-12" v-if="!isLogin">
+        <label for="qualification" class="form-label">Your Qualification:</label>
+        <input type="text" v-model="qualification" name="qualification" id="qualification" class="form-control" placeholder="Enter your Qualifications">
+      </div>
+      <div class="mb-3 col-12" v-if="!isLogin">
+        <label for="location" class="form-label">Your Location:</label>
+        <input type="text" v-model="location" name="location" id="location" class="form-control" placeholder="Enter your location">
+      </div>
+      <button type="submit" class="btn btn-success mt-3 offset-3 col-6">{{ isLogin ? "login" : "Register" }}</button>
+    </form>
+    <button type="button" @click="isLogin = !isLogin" class="btn btn-link mt-3 col-6 offset-3">
+      {{ isLogin ? "Need to Register" : "Already have an account" }}
+    </button>
+  </div>
+</template>
+
+<style scoped>
+.form-label {
+  color: greenyellow;
+}
+.form-control {
+  border-color: greenyellow;
+}
+.btn-link {
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 2rem;
+}
+</style>

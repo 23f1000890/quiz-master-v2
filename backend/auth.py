@@ -72,17 +72,6 @@ def login():
         "login_time": datetime.now().strftime("%H:%M:%S")
     }
     redis_conn.rpush("login_details", json.dumps(login_data))
-    
-    # history = LoginHistory(
-    #     user_id = user_id,
-    #     role_type = role,
-    #     ip_address = request.remote_addr,
-    #     user_agent = request.headers.get("user_agent"),
-    #     success = success,
-    #     login_time = datetime.now().strftime("%H:%M:%S")
-    # )
-    # db.session.add(history)
-    # db.session.commit()
 
     if not success:
         return jsonify({
