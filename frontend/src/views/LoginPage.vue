@@ -1,7 +1,8 @@
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { onMounted, ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
+const route = useRoute();
 const router = useRouter();
 
 const isLogin = ref(true);
@@ -13,6 +14,7 @@ const dob = ref("");
 const qualification = ref("");
 const location = ref("");
 const error = ref("");
+const success = ref("");
 
 const handleLogin = async() => {
   try {
@@ -26,16 +28,21 @@ const handleLogin = async() => {
     })
 
     const message = await response.json();
-    if(!response.ok) throw new Error(message.msg || "Invalid login, failed!!!");
+    if(!response.ok) {
+      error.value = message.msg || "Invalid login, failed!!!";
+    } else {
+      router.push({
+        path: message.role === "admin" ? "/admin" : "/user",
+        query: { flash: message.msg || message.role === "admin" ? "Welcome to Admin Portal" : "Welcome to User Portal"}
+      })
+    }
 
     localStorage.setItem("access_token", message.access_token);
     localStorage.setItem("refresh_token", message.refresh_token);
     localStorage.setItem("role", message.role);
-
-    router.push(message.role === "admin" ? "/admin" : "/user");
   
   } catch (err) {
-    error.value = err.message 
+    error.value = err.message; 
   }
 }
 
@@ -55,12 +62,33 @@ const handleRegister = async() => {
       }),
     })
     const message = await response.json();
-    if(!response.ok) throw new Error(message.msg || "Registration Denied!!!");
+    if(!response.ok) {
+      error.value = message.msg || "Registration Denied!!!"
+    } else {
+      router.push({
+        path: '/login',
+        query: { flash: message.msg || "Registration successfull"}
+      })
+    };
+
     isLogin.value = true;
   } catch (err) {
-    error.value = err.message
+    error.value = err.message;
   }
 }
+
+onMounted(() => {
+  if(route.query.flash) {
+    success.value = route.query.flash //read flash message from the route
+  }
+})
+
+// reactively update success on query change
+watch(() => route.query.flash, (newVal) => {
+  if (newVal) {
+    success.value = newVal;
+  }
+});
 </script>
 
 
@@ -68,7 +96,14 @@ const handleRegister = async() => {
   <div class="container mt-5 form-body row-gap-3 col-6 offset-3">
     <h1 class="text-success" align="center">Welcome to intelliquest 2.0</h1>
     <h1 class="text-light border-3 border-bottom border-danger-subtle mb-4 mt-3 text-center">{{ isLogin ? "login" : "Register" }}</h1>
-    <div class="col-4 offset-8 mt-3 text-danger" v-if="error">{{ error }}</div>
+    <div class="alert alert-danger alert-dismissible fade show col-4 offset-8 mt-3" v-if="error" role="alert">
+      {{ error }}
+      <button type="button" class="btn-close btn-light" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div class="alert alert-success alert-dismissible fade show col-4 offset-8 mt-3" v-if="success" role="alert">
+      {{ success }}
+      <button type="button" class="btn-close btn-light" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
     <form @submit.prevent="isLogin ? handleLogin() : handleRegister()">
       <div class="mb-3 col-12">
         <label for="email" class="form-label">Email:</label>

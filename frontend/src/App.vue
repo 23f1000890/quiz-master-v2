@@ -11,5 +11,6 @@ import NavbarHome from '@/components/NavbarHome.vue'
 body {
   font-family: 'Yrsa', sans-serif;
   background-color: #141005;
+  /* background-color: #664B37 */
 }
 </style>

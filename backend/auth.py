@@ -50,34 +50,39 @@ def login():
     data = request.get_json()
     email = data.get("email")
     password = data.get("password")
-    role = "user"
 
     user = User.query.filter_by(email=email).first()
+    role = "user"
+
     if not user:
         user = Admin.query.filter_by(email=email).first()
         role = "admin"
     
-    success = user and check_password_hash(user.password, password)
-    
-    user_id = user.admin_id if role == "admin" else (user.user_id if user else "unknown")
+    if not user:
+        return jsonify({
+            "msg": "Invalid User, Please Register Yourself!!!"
+        }), 401
+
+    if not check_password_hash(user.password, password):
+        return jsonify({
+            "msg": "Please check your Username or Password!!!"
+        }), 401
+
+    # Determine ID and username safely
+    user_id = getattr(user, "user_id", getattr(user, "admin_id", "unknown"))
+    username = getattr(user, "username", "unknown")
 
     # save Login history in Redis
     login_data = {
         "user_id": user_id,
-        "username": user.username if role == "user" and user else "unknown",
+        "username": username,
         "role_type": role,
         "ip_address": request.remote_addr,
         "agent": request.headers.get("User-Agent"),
-        "success": success,
+        "success": True,
         "login_time": datetime.now().strftime("%H:%M:%S")
     }
     redis_conn.rpush("login_details", json.dumps(login_data))
-
-    if not success:
-        return jsonify({
-            "msg": "Invalid Credentials",
-            "redirect": "/register/",  # vue can catch it and redirects
-        }), 401
     
     # Successful login & create tokens
     access_token = create_access_token(

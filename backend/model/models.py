@@ -5,7 +5,7 @@ from uuid import uuid4
 
 class User(db.Model):
     __tablename__ = "user_table"
-    user_id = db.Column(db.String(25), primary_key=True, default=str(uuid4()))
+    user_id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid4()))
     username = db.Column(db.String(100), nullable=False, unique=True)
     email = db.Column(db.String(100), nullable=False)
     password = db.Column(db.String(255), nullable=False)
@@ -29,7 +29,7 @@ class User(db.Model):
 
 class Admin(db.Model):
     __tablename__ = "admin_table"
-    admin_id = db.Column(db.String(25), primary_key=True, default=str(uuid4()))
+    admin_id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid4()))
     email = db.Column(db.String(100), nullable=False)
     password = db.Column(db.String(255), nullable=False)
     role_type = db.Column(db.String(20), default="admin")
@@ -44,25 +44,10 @@ class Admin(db.Model):
         return check_password_hash(self.password, password)
     
 
-# class LoginHistory(db.Model):
-#     __tablename__ = "login_history"
-#     history_id = db.Column(db.String(25), primary_key=True, default=str(uuid4()))
-#     user_id = db.Column(db.String(25), db.ForeignKey("user_table.user_id"), nullable=False)
-#     login_time = db.Column(db.DateTime, default=datetime.now)
-#     logout_time = db.Column(db.DateTime)
-#     role_type = db.Column(db.String(20), nullable=False)  # "user" or "admin"
-#     ip_address = db.Column(db.String(100))
-#     user_agent = db.Column(db.String(255))
-#     success = db.Column(db.Boolean, default=True)
-#     location = db.Column(db.String(255))
-
-#     # ORM relationship
-#     users = db.relationship("User", backref="login_history", lazy=True) # A user can have multiple login history records
-
 
 class Subject(db.Model):
     __tablename__ = "subject_table"
-    subject_id = db.Column(db.String(25), primary_key=True, default=str(uuid4()))
+    subject_id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid4()))
     subject_name = db.Column(db.String(255), nullable=False)
     description = db.Column(db.Text)
 
@@ -71,19 +56,19 @@ class Subject(db.Model):
 
 class Chapter(db.Model):
     __tablename__ = "chapter_table"
-    chapter_id = db.Column(db.String(25), primary_key=True, default=str(uuid4()))
+    chapter_id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid4()))
     chapter_name = db.Column(db.String(255), nullable=False)
     description = db.Column(db.Text)
 
-    subject_id = db.Column(db.String(25), db.ForeignKey("subject_table.subject_id"), nullable=False)
+    subject_id = db.Column(db.String(36), db.ForeignKey("subject_table.subject_id"), nullable=False)
     quizzes = db.relationship("Quiz", backref="chapter", lazy=True, cascade="all, delete") # A chapter can have multiple quizzes
 
 
 class Quiz(db.Model):
     __tablename__ = "quiz_table"
-    quiz_id = db.Column(db.String(25), primary_key=True, default=str(uuid4()))
-    chapter_id = db.Column(db.String(25), db.ForeignKey("chapter_table.chapter_id"), nullable=False)
-    date_of_quiz = db.Column(db.DateTime, default=datetime.now, nullable=False)
+    quiz_id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid4()))
+    chapter_id = db.Column(db.String(36), db.ForeignKey("chapter_table.chapter_id"), nullable=False)
+    start_time = db.Column(db.DateTime, nullable=False)
     time_duration = db.Column(db.String(20), nullable=False) #hh:mm format
     remarks = db.Column(db.Text)
 
@@ -97,8 +82,8 @@ class Quiz(db.Model):
 
 class Question(db.Model):
     __tablename__ = "question_table"
-    question_id = db.Column(db.String(25), primary_key=True, default=str(uuid4()))
-    quiz_id = db.Column(db.String(25), db.ForeignKey("quiz_table.quiz_id"), nullable=False)
+    question_id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid4()))
+    quiz_id = db.Column(db.String(36), db.ForeignKey("quiz_table.quiz_id"), nullable=False)
     question_statement = db.Column(db.Text, nullable=False)
     question_title = db.Column(db.String(20), nullable=False)
     option1 = db.Column(db.String(255), nullable=False)
@@ -109,8 +94,8 @@ class Question(db.Model):
 
 class Score(db.Model):
     __tablename__ = "score_table"
-    score_id = db.Column(db.String(25), primary_key=True, default=str(uuid4()))
-    quiz_id = db.Column(db.Integer, db.ForeignKey("quiz_table.quiz_id"), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey("user_table.user_id"), nullable=False)
+    score_id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid4()))
+    quiz_id = db.Column(db.String(36), db.ForeignKey("quiz_table.quiz_id"), nullable=False)
+    user_id = db.Column(db.String(36), db.ForeignKey("user_table.user_id"), nullable=False)
     time_stamp_of_attempt = db.Column(db.DateTime, default=datetime.now, nullable=False)
     total_scored = db.Column(db.Integer, nullable=False)
