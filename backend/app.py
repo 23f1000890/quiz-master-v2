@@ -17,8 +17,10 @@ CORS(app, supports_credentials=True) #enables CORS for all routes
 
 #confugurations and modifications for the app
 app.config["JWT_SECRET_KEY"] = os.environ.get("JWT_SECRET_KEY")
+app.config["CACHE_REDIS_URL"] = os.environ.get("REDIS_URL")
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("SQLALCHEMY_DATABASE_URI")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["CACHE_DEFAULT_TIMEOUT"] = 180  # default expiry in seconds (3 minutes)
 
 jwt = JWTManager(app) #initialize json web token authentication
 
