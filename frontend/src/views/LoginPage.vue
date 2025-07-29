@@ -32,7 +32,7 @@ const handleLogin = async() => {
       error.value = message.msg || "Invalid login, failed!!!";
     } else {
       router.push({
-        path: message.role === "admin" ? "/admin" : "/user",
+        path: message.role === "admin" ? "/admin/" : `/user/${message.user_id}/`,
         query: { flash: message.msg || message.role === "admin" ? "Welcome to Admin Portal" : "Welcome to User Portal"}
       })
     }

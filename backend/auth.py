@@ -16,17 +16,17 @@ auth_user = Blueprint("auth_user", __name__)
 redis_conn = Redis.from_url(os.getenv("REDIS_URL"))
 
 # ---------------------- JWT setup & Blacklist check ---------------------------
-@auth_user.record_once
-def set_jwt_callbacks(state):
-    jwt = JWTManager(state.app)
+# @auth_user.record_once
+# def set_jwt_callbacks(state):
+#     jwt = JWTManager(state.app)
 
-    @jwt.token_in_blocklist_loader
-    def is_token_blacklisted(jwt_header, jwt_payload):
-        return redis_conn.get(jwt_payload["jti"]) is not None
+#     @jwt.token_in_blocklist_loader
+#     def is_token_blacklisted(jwt_header, jwt_payload):
+#         return redis_conn.get(jwt_payload["jti"]) is not None
     
-    @jwt.unauthorized_loader
-    def custom_unauthorized(callback):
-        return jsonify({"msg": "Missing or Invalid token"}), 401
+#     @jwt.unauthorized_loader
+#     def custom_unauthorized(callback):
+#         return jsonify({"msg": "Missing or Invalid token"}), 401
 
 # ------------------------- Role required decorators ----------------------------------
 
@@ -72,17 +72,17 @@ def login():
     user_id = getattr(user, "user_id", getattr(user, "admin_id", "unknown"))
     username = getattr(user, "username", "unknown")
 
-    # save Login history in Redis
-    login_data = {
-        "user_id": user_id,
-        "username": username,
-        "role_type": role,
-        "ip_address": request.remote_addr,
-        "agent": request.headers.get("User-Agent"),
-        "success": True,
-        "login_time": datetime.now().strftime("%H:%M:%S")
-    }
-    redis_conn.rpush("login_details", json.dumps(login_data))
+    # # save Login history in Redis
+    # login_data = {
+    #     "user_id": user_id,
+    #     "username": username,
+    #     "role_type": role,
+    #     "ip_address": request.remote_addr,
+    #     "agent": request.headers.get("User-Agent"),
+    #     "success": True,
+    #     "login_time": datetime.now().strftime("%H:%M:%S")
+    # }
+    # redis_conn.rpush("login_details", json.dumps(login_data))
     
     # Successful login & create tokens
     access_token = create_access_token(
@@ -99,7 +99,8 @@ def login():
     return jsonify({
         "access_token": access_token,
         "refresh_token": refresh_token,
-        "role": role
+        "role": role,
+        "user_id": user_id,
     }), 200
 
 # Register route
@@ -152,16 +153,16 @@ def refresh():
 @auth_user.post("/logout/")
 @jwt_required()
 def logout():
-    jti = get_jwt()["jti"]
-    exp = get_jwt()["exp"]
-    ttl = exp - int(datetime.now().timestamp())
-    redis_conn.setex(jti, ttl, "revoked")
+    # jti = get_jwt()["jti"]
+    # exp = get_jwt()["exp"]
+    # ttl = exp - int(datetime.now().timestamp())
+    # redis_conn.setex(jti, ttl, "revoked")
 
-    # save logout history in Redis
-    logout_data = {
-        "user_id": get_jwt_identity(),
-        "logout_time": datetime.now().strftime("%H:%M:%S")
-    }
-    redis_conn.rpush("logout_details", json.dumps(logout_data))
+    # # save logout history in Redis
+    # logout_data = {
+    #     "user_id": get_jwt_identity(),
+    #     "logout_time": datetime.now().strftime("%H:%M:%S")
+    # }
+    # redis_conn.rpush("logout_details", json.dumps(logout_data))
     
     return jsonify({"msg": "Logged out"}), 200

@@ -13,6 +13,9 @@ import AddQuiz from '@/views/AddQuiz.vue'
 import EditQuiz from '@/views/EditQuiz.vue'
 import AddQuestion from '@/views/AddQuestion.vue'
 import EditQuestion from '@/views/EditQuestion.vue'
+import QuizPage from '@/views/QuizPage.vue'
+import QuizSubmission from '@/views/QuizSubmission.vue'
+import QuizSummary from '@/views/QuizSummary.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -37,7 +40,7 @@ const router = createRouter({
       }
     },
     {
-      path: '/user',
+      path: '/user/:user_id',
       name: 'user',
       component: UserPage,
       meta: {
@@ -94,6 +97,21 @@ const router = createRouter({
       path: '/user_details',
       name: 'UserDetails',
       component: UserDetails,
+    },
+    {
+      path: '/user/:user_id/quiz/:quiz_id/start',
+      name: 'quiz',
+      component: QuizPage,
+    },
+    {
+      path: '/user/:user_id/quiz/:quiz_id/submit',
+      name: 'quizsubmission',
+      component: QuizSubmission,
+    },
+    {
+      path: '/user/:user_id/summary',
+      name: 'quizsummary',
+      component: QuizSummary,
     }
   ],
 })

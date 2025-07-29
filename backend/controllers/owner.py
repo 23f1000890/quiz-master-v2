@@ -1,6 +1,5 @@
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required
-from flask_sqlalchemy import SQLAlchemy
 from auth import role_required
 from model.models import *
 from sqlalchemy.exc import IntegrityError
