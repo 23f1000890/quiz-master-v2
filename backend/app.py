@@ -9,6 +9,7 @@ from model.models import db, Admin
 from auth import auth_user
 from controllers.owner import auth_admin
 from controllers.users import reg_user
+from redis_config import cache
 
 load_dotenv() #load variables from .env files
 
@@ -16,6 +17,7 @@ app = Flask(__name__) #initialize the app
 CORS(app, supports_credentials=True) #enables CORS for all routes
 
 #confugurations and modifications for the app
+app.config["CACHE_TYPE"] = "RedisCache"
 app.config["JWT_SECRET_KEY"] = os.environ.get("JWT_SECRET_KEY")
 app.config["CACHE_REDIS_URL"] = os.environ.get("REDIS_URL")
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("SQLALCHEMY_DATABASE_URI")
@@ -23,6 +25,7 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["CACHE_DEFAULT_TIMEOUT"] = 180  # default expiry in seconds (3 minutes)
 
 jwt = JWTManager(app) #initialize json web token authentication
+cache.init_app(app) # initialize cache
 
 # database initializations
 db.init_app(app)

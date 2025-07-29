@@ -4,12 +4,14 @@ from auth import role_required
 from model.models import *
 from sqlalchemy.exc import IntegrityError
 from datetime import timedelta
+from redis_config import cache
 
 reg_user = Blueprint("reg_user", __name__)
 
 @reg_user.get("/<string:user_id>/")
 @jwt_required()
 @role_required("user")
+@cache.cached(timeout=180, key_prefix="user_dashboard")
 def user_dashboard(user_id):
     quizzes = Quiz.query.all()
     reg_user = User.query.filter_by(user_id=user_id).first_or_404()
@@ -34,6 +36,7 @@ def user_dashboard(user_id):
 @reg_user.get("/<string:user_id>/quiz/<string:quiz_id>/start/")
 @jwt_required()
 @role_required("user")
+@cache.cached(timeout=180, key_prefix="quiz")
 def quiz(user_id, quiz_id):
     quiz = Quiz.query.filter_by(quiz_id=quiz_id).first_or_404()
     if not quiz:
@@ -109,37 +112,6 @@ def scoreboard(user_id, quiz_id):
 @jwt_required()
 @role_required("user")
 def summary(user_id):
-    # reg_user = User.query.filter_by(user_id=user_id).first_or_404()
-
-    # # All attempts by this user
-    # attempts = Score.query.filter_by(user_id=user_id).order_by(Score.time_stamp_of_attempt.desc()).all()
-
-    # # latest_attempt = attempts[0]
-    # # quiz = Quiz.query.filter_by(quiz_id=latest_attempt.quiz_id).first()
-
-    # # attempt_count = len(attempts)
-
-    # # Calculate time taken for the latest attempt
-    # # time_taken = latest_attempt.time_stamp_of_attempt - quiz.start_time
-
-    # for attempt in attempts:
-    #     quiz = Quiz.query.filter_by(quiz_id=attempt.quiz_id).first()
-    #     time_taken = attempt.time_stamp_of_attempt - quiz.start_time
-
-    # return jsonify({
-    #     "attempts": [
-    #         {
-    #             "score_id": attempt.score_id,
-    #             "total_scored": attempt.total_scored,
-    #             "submitted_at": attempt.time_stamp_of_attempt.strftime("%Y-%m-%d %H:%M:%S"),
-    #             "time_taken": str(time_taken),
-    #             "question_count": attempt.quiz.question_count,
-    #             "chapter_name": quiz.chapter.chapter_name
-    #         }
-    #     ]
-        
-    # })
-
     reg_user = User.query.filter_by(user_id=user_id).first_or_404()
     attempts = Score.query.filter_by(user_id=user_id).order_by(Score.time_stamp_of_attempt.desc()).all()
 
