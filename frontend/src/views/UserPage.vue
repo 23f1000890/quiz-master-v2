@@ -20,6 +20,24 @@ const fetchdata = async() => {
     message.value = await res.json();
 }
 
+const triggerExport = async() => {
+  try {
+    const res = await fetch("http://127.0.0.1:4001/user/export_csv/", {
+      method: "POST",
+      headers: {
+        'content-type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      },
+    });
+    const data = await res.json();
+    message.value = data.message;
+  } catch (err) {
+    message.value = err.message || "Something went wrong.";
+  }
+}
+
+
+
 onMounted(() => {
     if(route.query.flash) {
         success.value = route.query.flash //read flash message from the route
@@ -49,6 +67,9 @@ fetchdata();
             }" class="btn btn-primary"><strong>Summary</strong></router-link>
         </div>
         <h1 class="text-info border-primary border-bottom border-2 pb-3 mb-3 mt-5" align="center">-- Upcoming Quizzes --</h1>
+        <div class="d-grid d-lg-flex justify-content-lg-end gap-2 me-5 mt-5 mb-3">
+            <button class="btn btn-outline-info" @click="triggerExport">Export My Quiz Data as CSV</button>
+        </div>
         <table class="table table-dark table-bordered border-primary">
             <thead>
                 <tr>
