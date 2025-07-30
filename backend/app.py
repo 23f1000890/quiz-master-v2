@@ -4,12 +4,13 @@ from flask import Flask
 from flask import jsonify
 from dotenv import load_dotenv
 from flask_cors import CORS
-from flask_jwt_extended import JWTManager
+from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity
 from model.models import db, Admin
 from auth import auth_user
 from controllers.owner import auth_admin
 from controllers.users import reg_user
 from redis_config import cache
+from model.models import *
 
 load_dotenv() #load variables from .env files
 
@@ -50,6 +51,7 @@ def quiz_server():
         "msg": "Welcome To IntelliQuest 2.0",
         "desc": "This is the Exam Preparation site for multiple courses. Anyone can give a Mock Test here and evaluate themselves."
     })
+
 
 #run app
 if __name__ == "__main__":

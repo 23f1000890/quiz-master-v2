@@ -4,14 +4,13 @@ from auth import role_required
 from model.models import *
 from sqlalchemy.exc import IntegrityError
 from datetime import timedelta
-from redis_config import cache
+# from celery_app import export_user_quiz_csv
 
 reg_user = Blueprint("reg_user", __name__)
 
 @reg_user.get("/<string:user_id>/")
 @jwt_required()
 @role_required("user")
-@cache.cached(timeout=180, key_prefix="user_dashboard")
 def user_dashboard(user_id):
     quizzes = Quiz.query.all()
     reg_user = User.query.filter_by(user_id=user_id).first_or_404()
@@ -36,7 +35,6 @@ def user_dashboard(user_id):
 @reg_user.get("/<string:user_id>/quiz/<string:quiz_id>/start/")
 @jwt_required()
 @role_required("user")
-@cache.cached(timeout=180, key_prefix="quiz")
 def quiz(user_id, quiz_id):
     quiz = Quiz.query.filter_by(quiz_id=quiz_id).first_or_404()
     if not quiz:
@@ -133,3 +131,16 @@ def summary(user_id):
         })
 
     return jsonify({"attempts": attempt_list})
+
+
+@reg_user.post("/export_csv/")
+@jwt_required()
+@role_required("user")
+def export_user_csv():
+    user_id = get_jwt_identity()
+    user = User.query.get(user_id)
+    
+    from celery_app import export_user_quiz_csv  # Moved inside to avoid circular import
+
+    export_user_quiz_csv.delay(user_id, user.email)
+    return jsonify({"message": "Export job started. You'll receive an email when it's ready."}), 202

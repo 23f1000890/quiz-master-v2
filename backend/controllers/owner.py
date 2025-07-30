@@ -10,7 +10,6 @@ auth_admin = Blueprint("auth_admin", __name__)
 @auth_admin.get("/")
 @jwt_required()
 @role_required("admin")
-@cache.cached(timeout=180, key_prefix="admin_dashboard")
 def admin_dashboard():
     reg_admin = Admin.query.filter_by(role_type='admin').first_or_404()
     subjects = Subject.query.all()
@@ -36,6 +35,7 @@ def admin_dashboard():
 @auth_admin.get("/user_details/")
 @jwt_required()
 @role_required("admin")
+@cache.cached(timeout=180, key_prefix="quiz")
 def user_details():
     users = User.query.filter_by(role_type="user").all()
     reg_admin = Admin.query.first_or_404()
@@ -191,7 +191,6 @@ def delete_chapter(chapter_id):
 @auth_admin.get("/quiz_dash/")
 @jwt_required()
 @role_required("admin")
-@cache.cached(timeout=180, key_prefix="quiz_dashboard")
 def quiz_dash():
     quizzes = Quiz.query.all() # fetch all quize info
     return jsonify({
